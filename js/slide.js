@@ -14,24 +14,38 @@ export const Slide = (slide, wrapper) => {
   }
 
   function onStart(event) {
-    event.preventDefault();
-    dist.startX = event.clientX;
-    wrapperEl.addEventListener("mousemove", onMove);
+    let movetype;
+    if (event.type === "mousedown") {
+      event.preventDefault();
+      dist.startX = event.clientX;
+      movetype = "mousemove";
+    } else {
+      dist.startX = event.changedTouches[0].clientX;
+      movetype = "touchmove";
+    }
+    wrapperEl.addEventListener(movetype, onMove);
   }
 
   function onMove(event) {
-    const finalPosition = updatePosition(event.clientX);
+    const pointerPosition =
+      event.type === "mousemove"
+        ? event.clientX
+        : event.changedTouches[0].clientX;
+    const finalPosition = updatePosition(pointerPosition);
     moveSlide(finalPosition);
   }
 
   function onEnd(event) {
-    wrapperEl.removeEventListener("mousemove", onMove);
+    const movetype = event.type === "mouseup" ? "mousemove" : "touchmove";
+    wrapperEl.removeEventListener(movetype, onMove);
     dist.finalPosition = dist.movePosition;
   }
 
   function addSlideEvents() {
     wrapperEl.addEventListener("mousedown", onStart);
+    wrapperEl.addEventListener("touchstart", onStart);
     wrapperEl.addEventListener("mouseup", onEnd);
+    wrapperEl.addEventListener("touchend", onEnd);
   }
 
   function init() {
